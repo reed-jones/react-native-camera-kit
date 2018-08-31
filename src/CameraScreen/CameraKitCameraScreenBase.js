@@ -80,7 +80,7 @@ export default class CameraScreenBase extends Component {
   }
 
   isCaptureRetakeMode() {
-    return !!(this.props.allowCaptureRetake && !_.isUndefined(this.state.imageCaptured));
+    return !!(this.props.allowCaptureRetake && !_.isUndefined(this.state.imageCaptured) && !this.props.returnImageOnSave);
   }
 
   getCameraOptions() {
@@ -174,7 +174,7 @@ export default class CameraScreenBase extends Component {
     const numberTook = this.state.captureImages.length;
     if (numberTook >= 2) {
       return numberTook;
-    } else if (this.state.captured) {
+    } else if (this.state.captured && !this.props.returnImageOnSave) {
       return '1';
     } else {
       return '';
@@ -290,11 +290,24 @@ export default class CameraScreenBase extends Component {
   }
 
   async onCaptureImagePressed() {
-    const shouldSaveToCameraRoll = !this.props.allowCaptureRetake;
+    const shouldSaveToCameraRoll = !this.props.allowCaptureRetake && !this.props.returnImageOnSave;
     const image = await this.camera.capture(shouldSaveToCameraRoll);
 
     if (this.props.allowCaptureRetake) {
       this.setState({ imageCaptured: image });
+    } else if (this.props.returnImageOnSave) {
+      this.setState(
+        _ => ({
+          captured: true,
+          imageCaptured: image
+        }),
+        _ => {
+          if (this.props.onBottomButtonPressed) {
+            this.props.onBottomButtonPressed({ type: 'capture', image })
+          }
+        }
+      );
+      // this.sendBottomButtonPressedAction('capture', false, image);
     } else {
       if (image) {
         this.setState({ captured: true, imageCaptured: image, captureImages: _.concat(this.state.captureImages, image) });

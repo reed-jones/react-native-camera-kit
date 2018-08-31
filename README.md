@@ -85,7 +85,6 @@ Finally to ask for the camera permission, in `AndroidManifest.xml` add:
     ratioOverlayColor: '#00000077' // optional
   }}
   onReadQRCode={(event) => console.log(event.nativeEvent.qrcodeStringValue)} // optional
-
 />
 ```
 
